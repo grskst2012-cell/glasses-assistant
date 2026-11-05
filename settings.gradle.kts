@@ -6,5 +6,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "GlassesAssistant"
+rootProject.name = "MetaMockup"
 include(":app")

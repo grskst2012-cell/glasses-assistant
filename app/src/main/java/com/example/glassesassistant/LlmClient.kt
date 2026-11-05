@@ -23,34 +23,30 @@ class LlmClient(private val baseUrl: String, private val apiKey: String, private
     private val history = JSONArray()
     private var toolsSupported = true
 
-    private fun system(city: String, tools: Boolean, detailed: Boolean): String {
-        val now = SimpleDateFormat("EEEE, d MMMM yyyy, HH:mm", Locale("ru")).format(Date())
+    private fun system(city: String, tools: Boolean, detailed: Boolean, env: AssistEnv): String {
+        val now = SimpleDateFormat("EEEE, d MMMM yyyy, HH:mm", env.locale).format(Date())
         return buildString {
-            append("Ты голосовой ассистент в умных очках. Пользователь идёт по улице: слушает, не читает. ")
-            append("Сейчас $now, часовой пояс ${TimeZone.getDefault().id}. ")
-            append(if (city.isBlank()) "Город пользователя не задан. " else "Город пользователя: $city. ")
-            append("Правила: отвечай по-русски, ")
-            append(if (detailed) "подробно, но не больше пяти предложений. " else "в один-два коротких предложения, суть сразу в начале. ")
-            append("Только устная речь: никакого markdown, списков, эмодзи, ссылок и скобок. ")
-            append("Числа, время, дату и единицы пиши словами в правильном падеже (например «двадцать два градуса», «пятнадцать тридцать»). ")
-            if (tools) append("Любые изменчивые факты — время, погоду, курсы валют, справочные данные — получай ТОЛЬКО через инструменты, " +
-                "не называй такие цифры по памяти. Всегда коротко называй источник и время данных (например «по данным Центробанка на сегодня»). " +
-                "Если инструмент вернул ОШИБКА или ничего — честно скажи, что данных нет. ")
-            append("Если не уверен — так и скажи. Не выдумывай.")
+            append(env.s(R.string.prompt_intro, now, TimeZone.getDefault().id))
+            append(if (city.isBlank()) env.s(R.string.prompt_city_unset) else env.s(R.string.prompt_city_set, city))
+            append(env.s(if (detailed) R.string.prompt_len_detailed else R.string.prompt_len_short))
+            append(env.s(R.string.prompt_speech_rules))
+            if (tools) append(env.s(R.string.prompt_tools_rules))
+            append(env.s(R.string.prompt_translate_rules))
+            append(env.s(R.string.prompt_tail))
         }
     }
 
     @Synchronized
-    fun ask(text: String, city: String, tools: Boolean, detailed: Boolean): String {
+    fun ask(text: String, city: String, tools: Boolean, detailed: Boolean, env: AssistEnv): String {
         history.put(JSONObject().put("role", "user").put("content", text))
         val work = JSONArray()
         for (i in maxOf(0, history.length() - 12) until history.length()) work.put(history.get(i))
         var useTools = tools && toolsSupported
         var iter = 0
         while (true) {
-            val defs = if (useTools && iter < 4) Tools.definitions else null
+            val defs = if (useTools && iter < 4) Tools.definitions(env.search != "off") else null
             val m = try {
-                chat(system(city, useTools, detailed), work, defs)
+                chat(system(city, useTools, detailed, env), work, defs)
             } catch (e: LlmException) {
                 // модель/провайдер не поддерживает инструменты — отвечаем без них
                 if (e.kind == LlmException.Kind.BAD_REQUEST && defs != null) { toolsSupported = false; useTools = false; continue }
@@ -63,13 +59,13 @@ class LlmClient(private val baseUrl: String, private val apiKey: String, private
                 for (i in 0 until calls.length()) {
                     val c = calls.getJSONObject(i); val f = c.getJSONObject("function")
                     val args = try { JSONObject(f.optString("arguments", "{}").ifBlank { "{}" }) } catch (_: Exception) { JSONObject() }
-                    val res = Tools.run(f.getString("name"), args, city)
+                    val res = Tools.run(f.getString("name"), args, city, env)
                     work.put(JSONObject().put("role", "tool").put("tool_call_id", c.optString("id")).put("content", res))
                 }
                 iter++; continue
             }
             val ans = (if (m.isNull("content")) "" else m.getString("content")).trim()
-                .ifBlank { "Не получилось сформулировать ответ." }
+                .ifBlank { env.s(R.string.err_empty) }
             history.put(JSONObject().put("role", "assistant").put("content", ans))
             return ans
         }

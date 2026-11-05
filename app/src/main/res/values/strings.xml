@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Meta Mockup</string>
+
+    <!-- Navigation -->
+    <string name="title_assistant">Assistant</string>
+    <string name="title_settings">Settings</string>
+    <string name="tab_dialog">Dialog</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- States (big label on the dialog screen) -->
+    <string name="state_not_running">Not running</string>
+    <string name="state_waiting">Waiting for a command</string>
+    <string name="state_listening">Listening</string>
+    <string name="state_thinking">Thinking</string>
+    <string name="state_speaking">Speaking</string>
+    <string name="state_muted">Microphone off</string>
+    <string name="state_connecting">Connecting</string>
+
+    <!-- Status line (set by the service) -->
+    <string name="status_stopped">Stopped</string>
+    <string name="status_glasses_found">Glasses found</string>
+    <string name="status_glasses_missing">Glasses not found, using the phone</string>
+    <string name="status_phone_mic">Using the phone microphone</string>
+    <string name="status_waiting_word">Waiting for “%1$s”</string>
+    <string name="status_listening">Listening…</string>
+    <string name="status_thinking">Thinking…</string>
+    <string name="status_speaking">Speaking…</string>
+    <string name="status_mic_off">Microphone is off</string>
+    <string name="status_no_mic_permission">No microphone access</string>
+    <string name="status_vosk_loading">Loading the offline wake word model…</string>
+    <string name="status_vosk_missing">Offline model not installed, using Android recognition</string>
+
+    <!-- Dialog screen -->
+    <string name="btn_talk">Talk</string>
+    <string name="btn_hush">Quiet</string>
+    <string name="btn_mic_off">Mic off</string>
+    <string name="btn_mic_on">Turn mic on</string>
+    <string name="btn_start">Start assistant</string>
+    <string name="chip_repeat">Repeat</string>
+    <string name="chip_stop">Stop</string>
+    <string name="chip_time">What time is it?</string>
+    <string name="q_time">What time is it now?</string>
+    <string name="chip_weather">Weather</string>
+    <string name="q_weather">What is the weather like right now?</string>
+    <string name="chip_rates">Exchange rates</string>
+    <string name="q_rates">What are today’s dollar and euro rates?</string>
+    <string name="chip_news">News</string>
+    <string name="q_news">What are the main news today? Search the web.</string>
+    <string name="chip_more">More detail</string>
+    <string name="q_more">Tell me more about that.</string>
+    <string name="chip_translate">Translate…</string>
+    <string name="translate_prefix">Translate to English: </string>
+    <string name="hint_empty_running">Say “%1$s” or tap “Talk”. Answers stay here: addresses, numbers and links are easier to read than to listen to.</string>
+    <string name="hint_empty_stopped">Tap “Start assistant”. It keeps working in the background, even with the screen off.</string>
+    <string name="input_placeholder">Ask by text</string>
+    <string name="btn_send">Send</string>
+
+    <!-- Settings: appearance -->
+    <string name="sec_appearance">Appearance</string>
+    <string name="theme_label">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="dynamic_title">Dynamic color</string>
+    <string name="dynamic_desc">Colors follow your wallpaper (Material You)</string>
+    <string name="accent_label">Accent color</string>
+    <string name="accent_blue">Blue</string>
+    <string name="accent_green">Green</string>
+    <string name="accent_purple">Purple</string>
+    <string name="accent_orange">Orange</string>
+    <string name="accent_red">Red</string>
+    <string name="accent_teal">Teal</string>
+    <string name="amoled_title">Pure black background</string>
+    <string name="amoled_desc">Saves battery on OLED screens in dark theme</string>
+    <string name="font_scale">Text size: %1$d%%</string>
+    <string name="haptics_title">Haptic feedback</string>
+    <string name="haptics_desc">A short vibration when the assistant starts listening</string>
+
+    <!-- Settings: language -->
+    <string name="sec_language">Language</string>
+    <string name="ui_lang_label">App language</string>
+    <string name="lang_ru" translatable="false">Русский</string>
+    <string name="lang_en" translatable="false">English</string>
+    <string name="ui_lang_system">System</string>
+    <string name="assistant_lang_label">Assistant language (speech and answers)</string>
+    <string name="lang_note">The assistant language applies after the assistant is restarted.</string>
+
+    <!-- Settings: voice -->
+    <string name="sec_voice">Voice</string>
+    <string name="wake_title">Wake word</string>
+    <string name="wake_on_desc">The assistant stays silent until you say the word</string>
+    <string name="wake_off_desc">Off: listens all the time and answers everything</string>
+    <string name="wake_field">Word or phrase</string>
+    <string name="wake_support">For example “assistant”. With Android recognition you can add a question right away: “assistant, what time is it?”. Applies after a restart.</string>
+    <string name="engine_label">Wake word engine</string>
+    <string name="engine_android">Android recognition</string>
+    <string name="engine_vosk">Vosk (offline)</string>
+    <string name="engine_vosk_desc">Vosk runs on the phone and uses much less battery. It only catches the word; the command is then recognized by Android. The word must exist in the model’s vocabulary.</string>
+    <string name="vosk_not_installed">Model not installed (about %1$d MB)</string>
+    <string name="vosk_installed">Model installed</string>
+    <string name="vosk_download">Download</string>
+    <string name="vosk_downloading">Downloading… %1$d%%</string>
+    <string name="vosk_delete">Delete</string>
+    <string name="vosk_error">Download failed: %1$s</string>
+    <string name="barge_title">Interrupt by voice</string>
+    <string name="barge_desc">Say “stop” while the assistant is speaking. Experimental: on open-ear glasses it may react to its own voice.</string>
+    <string name="glasses_title">Glasses microphone</string>
+    <string name="glasses_desc">Route sound and microphone through Bluetooth glasses if connected. Turn off if the glasses hear you badly.</string>
+    <string name="media_title">Glasses button</string>
+    <string name="media_desc">Tap on the glasses (play/pause) = Talk, next = repeat, previous = quiet. Takes over the media buttons while the assistant runs. Experimental.</string>
+    <string name="rate_label">Speech rate: %1$s×</string>
+    <string name="rate_hint">By voice: “slower”, “faster”</string>
+
+    <!-- Settings: data -->
+    <string name="sec_data">Live data</string>
+    <string name="tools_title">Check facts with sources</string>
+    <string name="tools_desc">Time, weather (Open-Meteo), Bank of Russia rates, Wikipedia. The assistant names the source and the time of the data. Needs a model with function calling; without it answers have no sources.</string>
+    <string name="city_label">Your city</string>
+    <string name="city_support">For weather. Only the city name is sent to the model, never coordinates.</string>
+    <string name="search_label">Web search</string>
+    <string name="search_off">Off</string>
+    <string name="search_ddg">DuckDuckGo</string>
+    <string name="search_tavily">Tavily</string>
+    <string name="search_desc">DuckDuckGo needs no key but is best-effort and may be blocked in some regions. Tavily is more reliable (free credits monthly).</string>
+    <string name="tavily_key_label">Tavily API key</string>
+
+    <!-- Settings: model -->
+    <string name="sec_model">Model and key</string>
+    <string name="url_label">API base URL</string>
+    <string name="key_label">API key</string>
+    <string name="model_label">Model</string>
+    <string name="key_show">Show</string>
+    <string name="key_hide">Hide</string>
+    <string name="btn_show_models">Show models</string>
+    <string name="btn_hide_models">Hide models</string>
+    <string name="btn_show_models_n">Show models (%1$d)</string>
+    <string name="btn_loading">Loading…</string>
+    <string name="btn_refresh">Refresh list</string>
+    <string name="models_load_failed">Failed to load: %1$s</string>
+    <string name="sheet_title">Models (%1$d of %2$d)</string>
+    <string name="sheet_search">Search</string>
+    <string name="chip_free">Only :free</string>
+    <string name="sheet_none">Nothing found</string>
+    <string name="cd_close">Close</string>
+    <string name="cd_selected">Selected</string>
+
+    <!-- Settings: background, shortcuts, privacy -->
+    <string name="sec_background">Background work</string>
+    <string name="bg_desc">The assistant lives in a notification (with “Talk”, “Microphone” and “Stop” buttons) and listens with the screen off. It has to be started from the open app, a tile, a widget or the “Talk” shortcut: an Android 14+ rule.</string>
+    <string name="bg_ok">Battery restrictions removed</string>
+    <string name="bg_btn">Remove battery restrictions</string>
+    <string name="sec_shortcuts">Quick start</string>
+    <string name="shortcuts_desc">Add the “Assistant” tile to Quick Settings or the widget to your home screen: one tap starts the assistant, or talks if it is already running. Long-press the app icon for the “Talk” shortcut.</string>
+    <string name="sec_privacy">Privacy</string>
+    <string name="privacy_desc">While the assistant runs, Android shows the microphone indicator. Requests go to the model provider you chose; history is kept only in the app’s memory.</string>
+    <string name="btn_clear">Clear conversation history</string>
+
+    <!-- Spoken by the assistant -->
+    <string name="say_ready">Ready. Listening.</string>
+    <string name="say_nothing_to_repeat">Nothing to repeat yet.</string>
+    <string name="say_slower">Okay, speaking slower.</string>
+    <string name="say_faster">Okay, speaking faster.</string>
+    <string name="say_wait">One moment.</string>
+    <string name="err_network">No internet connection.</string>
+    <string name="err_auth">Check your API key and balance.</string>
+    <string name="err_rate">The model is overloaded right now. Try again in a minute.</string>
+    <string name="err_server">The model server is not responding.</string>
+    <string name="err_other">Could not get an answer.</string>
+    <string name="err_empty">I could not put together an answer.</string>
+    <string name="q_follow_up">Tell me more about that.</string>
+
+    <!-- Notification, tile, widget, shortcut -->
+    <string name="channel_name">Assistant</string>
+    <string name="notif_title">Assistant is running in the background</string>
+    <string name="notif_text_wake">Say “%1$s” or tap “Talk”</string>
+    <string name="notif_text_always">Listening continuously</string>
+    <string name="notif_talk">Talk</string>
+    <string name="notif_mic">Microphone</string>
+    <string name="notif_stop">Stop</string>
+    <string name="tile_label">Assistant</string>
+    <string name="tile_running">Tap to talk</string>
+    <string name="tile_stopped">Tap to start</string>
+    <string name="widget_talk">Talk</string>
+    <string name="widget_start">Start</string>
+    <string name="widget_description">Start the assistant or talk with one tap</string>
+    <string name="shortcut_talk">Talk</string>
+    <string name="shortcut_talk_long">Talk to the assistant</string>
+
+    <!-- System prompt pieces -->
+    <string name="prompt_intro">You are a voice assistant in smart glasses. The user is walking: they listen, they do not read. Now it is %1$s, time zone %2$s. </string>
+    <string name="prompt_city_set">The user’s city: %1$s. </string>
+    <string name="prompt_city_unset">The user’s city is not set. </string>
+    <string name="prompt_len_short">Reply in English in one or two short sentences, the point first. </string>
+    <string name="prompt_len_detailed">Reply in English in detail, but no more than five sentences. </string>
+    <string name="prompt_speech_rules">Spoken language only: no markdown, lists, emoji, links or parentheses. Spell out numbers, times, dates and units in words. </string>
+    <string name="prompt_tools_rules">Get any changing facts (time, weather, exchange rates, news, reference data) ONLY through tools; never state such figures from memory. Always briefly name the source and the time of the data (for example “according to the Central Bank, as of today”). If a tool returns an ERROR or nothing, say honestly that there is no data. </string>
+    <string name="prompt_translate_rules">If asked to translate a phrase, reply ONLY with the translation, starting with the tag [lang=code] where code is the ISO 639-1 code of the target language, for example “[lang=ru] Где находится вокзал?”. No explanations. </string>
+    <string name="prompt_tail">If you are not sure, say so. Do not make things up.</string>
+
+    <!-- Tool results (read by the model) -->
+    <string name="tool_time">%1$s, time zone %2$s. Source: phone clock.</string>
+    <string name="tool_err_unavailable">ERROR: the source is unavailable (%1$s). Tell the user that the data cannot be fetched right now and do not state any figures.</string>
+    <string name="tool_err_unknown">ERROR: unknown tool.</string>
+    <string name="tool_err_no_city">ERROR: no city given. Ask the user which city the weather is for.</string>
+    <string name="tool_err_city_not_found">ERROR: city “%1$s” not found.</string>
+    <string name="tool_err_no_currency">ERROR: these currencies are not in the Bank of Russia data.</string>
+    <string name="tool_err_empty_query">ERROR: empty query.</string>
+    <string name="tool_weather">City: %1$s. Now %2$d °C (feels like %3$d), %4$s, wind %5$d m/s. Today from %6$d to %7$d °C, chance of precipitation %8$d %%. Data as of %9$s. Source: Open-Meteo.</string>
+    <string name="tool_currency_item">%1$s: %2$s rub. per %3$s (yesterday %4$s)</string>
+    <string name="tool_currency_footer">Official Bank of Russia rate as of %1$s.</string>
+    <string name="tool_wiki_none">Nothing found in Wikipedia for “%1$s”.</string>
+    <string name="tool_wiki">“%1$s”: %2$s Source: Wikipedia (the article may be inaccurate).</string>
+    <string name="tool_search_none">No web results for “%1$s”.</string>
+    <string name="tool_search_footer">Source: web search; snippets may be inaccurate or outdated, so mention the site.</string>
+    <string name="tool_search_off">ERROR: web search is turned off in settings.</string>
+    <string name="tool_search_need_key">ERROR: the Tavily API key is not set in settings.</string>
+    <string name="w_clear">clear</string>
+    <string name="w_mostly_clear">mostly clear</string>
+    <string name="w_partly_cloudy">partly cloudy</string>
+    <string name="w_overcast">overcast</string>
+    <string name="w_fog">fog</string>
+    <string name="w_drizzle">drizzle</string>
+    <string name="w_rain">rain</string>
+    <string name="w_snow">snow</string>
+    <string name="w_showers">heavy showers</string>
+    <string name="w_snowfall">snowfall</string>
+    <string name="w_thunderstorm">thunderstorm</string>
+    <string name="w_unknown">no description</string>
+</resources>

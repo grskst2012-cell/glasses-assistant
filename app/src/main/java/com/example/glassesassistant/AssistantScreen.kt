@@ -15,12 +15,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -33,15 +37,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private val quickCommands = listOf(
-    "Сколько времени?" to "Сколько сейчас времени?",
-    "Погода" to "Какая сейчас погода?",
-    "Курс валют" to "Какой сегодня курс доллара и евро?",
-    "Подробнее" to "Расскажи подробнее об этом.",
-)
-
 @Composable
-fun AssistantScreen(inner: PaddingValues, onStart: () -> Unit) {
+fun AssistantScreen(inner: PaddingValues, ui: UiPrefs, prefs: android.content.SharedPreferences, onStart: () -> Unit) {
     val ctx = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val running = AssistantService.running
@@ -50,15 +47,29 @@ fun AssistantScreen(inner: PaddingValues, onStart: () -> Unit) {
     val log = AssistantService.log
     var typed by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
+    val inputFocus = remember { FocusRequester() }
+    val searchOn = (prefs.getString("search", "ddg") ?: "ddg") != "off"
 
     LaunchedEffect(log.size) { if (log.isNotEmpty()) listState.animateScrollToItem(log.lastIndex) }
-    LaunchedEffect(state) { if (state == UiState.LISTENING) haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
+    LaunchedEffect(state) {
+        if (state == UiState.LISTENING && ui.haptics) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+    }
 
+    fun buzz() { if (ui.haptics) haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
     fun ask(q: String) {
         if (q.isBlank() || !running) return
-        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        buzz()
         AssistantService.send(ctx, AssistantService.ACTION_ASK, q.trim())
     }
+
+    val quick = buildList {
+        add(stringResource(R.string.chip_time) to stringResource(R.string.q_time))
+        add(stringResource(R.string.chip_weather) to stringResource(R.string.q_weather))
+        add(stringResource(R.string.chip_rates) to stringResource(R.string.q_rates))
+        if (searchOn) add(stringResource(R.string.chip_news) to stringResource(R.string.q_news))
+        add(stringResource(R.string.chip_more) to stringResource(R.string.q_more))
+    }
+    val translatePrefix = stringResource(R.string.translate_prefix)
 
     Column(
         Modifier.padding(inner).consumeWindowInsets(inner).imePadding().padding(horizontal = 16.dp),
@@ -66,13 +77,13 @@ fun AssistantScreen(inner: PaddingValues, onStart: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         // --- состояние: орб, подпись, статус ---
-        Orb(state, Modifier.size(168.dp))
+        Orb(state, running, Modifier.size(168.dp))
         Column(
             Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(stateTitle(state, running), style = MaterialTheme.typography.headlineSmall)
-            Text(AssistantService.status, style = MaterialTheme.typography.bodyMedium,
+            if (running) Text(AssistantService.status, style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center,
                 maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
@@ -81,32 +92,33 @@ fun AssistantScreen(inner: PaddingValues, onStart: () -> Unit) {
         if (running) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(
-                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress); AssistantService.send(ctx, AssistantService.ACTION_PTT) },
+                    onClick = { buzz(); AssistantService.send(ctx, AssistantService.ACTION_PTT) },
                     modifier = Modifier.weight(2f).height(64.dp),
-                ) { Text("Говорить", style = MaterialTheme.typography.titleMedium) }
+                ) { Text(stringResource(R.string.btn_talk), style = MaterialTheme.typography.titleMedium) }
                 FilledTonalButton(
                     onClick = { AssistantService.send(ctx, AssistantService.ACTION_HUSH) },
                     modifier = Modifier.weight(1f).height(64.dp), contentPadding = PaddingValues(4.dp),
-                ) { Text("Тихо", textAlign = TextAlign.Center) }
+                ) { Text(stringResource(R.string.btn_hush), textAlign = TextAlign.Center) }
                 FilledTonalButton(
                     onClick = { AssistantService.send(ctx, AssistantService.ACTION_MUTE) },
                     colors = if (muted) ButtonDefaults.filledTonalButtonColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer,
                         contentColor = MaterialTheme.colorScheme.onErrorContainer) else ButtonDefaults.filledTonalButtonColors(),
                     modifier = Modifier.weight(1f).height(64.dp), contentPadding = PaddingValues(4.dp),
-                ) { Text(if (muted) "Включить микрофон" else "Выкл. микрофон", textAlign = TextAlign.Center,
+                ) { Text(stringResource(if (muted) R.string.btn_mic_on else R.string.btn_mic_off), textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.labelMedium) }
             }
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                item { SuggestionChip({ AssistantService.send(ctx, AssistantService.ACTION_REPEAT) }, { Text("Повтори") }) }
-                items(quickCommands) { (label, q) -> SuggestionChip({ ask(q) }, { Text(label) }) }
+                item { SuggestionChip({ AssistantService.send(ctx, AssistantService.ACTION_REPEAT) }, { Text(stringResource(R.string.chip_repeat)) }) }
+                items(quick) { (label, q) -> SuggestionChip({ ask(q) }, { Text(label) }) }
+                item { SuggestionChip({ typed = translatePrefix; inputFocus.requestFocus() }, { Text(stringResource(R.string.chip_translate)) }) }
                 item { SuggestionChip({ ctx.stopService(android.content.Intent(ctx, AssistantService::class.java)) },
-                    { Text("Остановить") }, colors = SuggestionChipDefaults.suggestionChipColors(
+                    { Text(stringResource(R.string.chip_stop)) }, colors = SuggestionChipDefaults.suggestionChipColors(
                         labelColor = MaterialTheme.colorScheme.error)) }
             }
         } else {
             Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(64.dp)) {
-                Text("Запустить ассистента", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.btn_start), style = MaterialTheme.typography.titleMedium)
             }
         }
 
@@ -117,8 +129,8 @@ fun AssistantScreen(inner: PaddingValues, onStart: () -> Unit) {
         ) {
             if (log.isEmpty()) Box(Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
                 Text(
-                    if (running) "Скажите «${hint()}» или нажмите «Говорить». Здесь останутся ответы: адреса, цифры и ссылки удобнее читать, чем слушать."
-                    else "Нажмите «Запустить ассистента». Он будет работать в фоне, даже когда экран выключен.",
+                    if (running) stringResource(R.string.hint_empty_running, prefs.getString("wake", "") ?: "")
+                    else stringResource(R.string.hint_empty_stopped),
                     textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             } else LazyColumn(
@@ -132,29 +144,25 @@ fun AssistantScreen(inner: PaddingValues, onStart: () -> Unit) {
         // --- ввод текстом ---
         OutlinedTextField(
             typed, { typed = it }, enabled = running, singleLine = true,
-            placeholder = { Text("Спросить текстом") }, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            placeholder = { Text(stringResource(R.string.input_placeholder)) },
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).focusRequester(inputFocus),
             shape = RoundedCornerShape(28.dp),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
             keyboardActions = KeyboardActions(onSend = { ask(typed); typed = "" }),
-            trailingIcon = { TextButton({ ask(typed); typed = "" }, enabled = running && typed.isNotBlank()) { Text("Отправить") } },
+            trailingIcon = { TextButton({ ask(typed); typed = "" }, enabled = running && typed.isNotBlank()) { Text(stringResource(R.string.btn_send)) } },
         )
     }
 }
 
 @Composable
-private fun hint(): String {
-    val p = LocalContext.current.getSharedPreferences("cfg", android.content.Context.MODE_PRIVATE)
-    return p.getString("wake", "ассистент") ?: "ассистент"
-}
-
-private fun stateTitle(s: UiState, running: Boolean) = if (!running) "Не запущен" else when (s) {
-    UiState.WAITING -> "Жду команду"
-    UiState.LISTENING -> "Слушаю"
-    UiState.THINKING -> "Думаю"
-    UiState.SPEAKING -> "Говорю"
-    UiState.MUTED -> "Микрофон выключен"
-    UiState.IDLE -> "Подключаюсь"
-}
+private fun stateTitle(s: UiState, running: Boolean) = stringResource(if (!running) R.string.state_not_running else when (s) {
+    UiState.WAITING -> R.string.state_waiting
+    UiState.LISTENING -> R.string.state_listening
+    UiState.THINKING -> R.string.state_thinking
+    UiState.SPEAKING -> R.string.state_speaking
+    UiState.MUTED -> R.string.state_muted
+    UiState.IDLE -> R.string.state_connecting
+})
 
 @Composable
 private fun Bubble(m: AssistantService.Msg) {
@@ -182,9 +190,10 @@ private fun Bubble(m: AssistantService.Msg) {
 
 /** Анимированный индикатор состояния: у каждого состояния свои цвет и движение. */
 @Composable
-private fun Orb(state: UiState, modifier: Modifier = Modifier) {
+private fun Orb(state: UiState, running: Boolean, modifier: Modifier = Modifier) {
     val cs = MaterialTheme.colorScheme
-    val target = when (state) {
+    val s = if (running) state else UiState.IDLE
+    val target = when (s) {
         UiState.IDLE -> cs.outline
         UiState.WAITING -> cs.secondary
         UiState.LISTENING -> cs.primary
@@ -193,19 +202,19 @@ private fun Orb(state: UiState, modifier: Modifier = Modifier) {
         UiState.MUTED -> cs.error
     }
     val color by animateColorAsState(target, tween(400), label = "color")
-    val amp by animateFloatAsState(when (state) {
+    val amp by animateFloatAsState(when (s) {
         UiState.IDLE, UiState.MUTED -> 0f
         UiState.WAITING -> 0.35f
         UiState.THINKING -> 0.25f
         UiState.LISTENING -> 1f
         UiState.SPEAKING -> 0.8f
     }, tween(400), label = "amp")
-    val period = when (state) { UiState.LISTENING -> 900; UiState.SPEAKING -> 600; UiState.THINKING -> 1400; else -> 3000 }
+    val period = when (s) { UiState.LISTENING -> 900; UiState.SPEAKING -> 600; UiState.THINKING -> 1400; else -> 3000 }
     val t = rememberInfiniteTransition(label = "orb")
     val pulse by t.animateFloat(0f, 1f, infiniteRepeatable(tween(period, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "pulse")
     val spin by t.animateFloat(0f, 360f, infiniteRepeatable(tween(1500, easing = LinearEasing)), label = "spin")
 
-    Canvas(modifier.semantics { }) {
+    Canvas(modifier) {
         val c = Offset(size.width / 2, size.height / 2)
         val core = size.minDimension * 0.28f
         for (i in 1..3) {
@@ -213,10 +222,10 @@ private fun Orb(state: UiState, modifier: Modifier = Modifier) {
             drawCircle(color.copy(alpha = (0.22f - 0.05f * i) * (0.5f + amp)), r, c)
         }
         drawCircle(color, core * (1f + 0.06f * amp * pulse), c)
-        if (state == UiState.THINKING) {
+        if (s == UiState.THINKING) {
             val r = core * 1.55f
             drawArc(color, spin, 110f, false, Offset(c.x - r, c.y - r), Size(r * 2, r * 2),
-                style = Stroke(width = 6.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round))
+                style = Stroke(width = 6.dp.toPx(), cap = StrokeCap.Round))
         }
     }
 }
