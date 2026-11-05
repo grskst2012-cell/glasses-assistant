@@ -10,3 +10,6 @@
 - DeepSeek: https://api.deepseek.com , deepseek-chat
 - Kimi: https://api.moonshot.ai/v1 , модель из консоли Moonshot
 - OpenRouter (есть :free модели): https://openrouter.ai/api/v1
+
+## Лицензия
+MIT, см. [LICENSE](LICENSE).
